@@ -23,6 +23,26 @@ public class TopNFinderBolt extends BaseBasicBolt {
 
   @Override
   public void execute(Tuple tuple, BasicOutputCollector collector) {
+	if (tuple.size() ==  2) {String word = tuple.getString(0);
+	Integer count = (Integer)tuple.getValue(1);
+	if (currentTopWords.get(word) == null){
+	    if (currentTopWords.size() < this.N) {
+		currentTopWords.put(word, count);
+	    } else {
+		Integer minValue = Integer.MAX_VALUE;
+		String minWord=word;
+		for (String s : currentTopWords.keySet()) {
+		    if (currentTopWords.get(s) < minValue){
+			minWord = s;
+			minValue = currentTopWords.get(s);
+		    }
+	  	}
+		currentTopWords.remove(minWord);
+		currentTopWords.put(word, count);	 
+	    }
+	}
+}
+
  /*
     ----------------------TODO-----------------------
     Task: keep track of the top N words

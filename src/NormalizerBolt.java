@@ -26,6 +26,7 @@ public class NormalizerBolt extends BaseBasicBolt {
       if (!commonWords.contains(word)) {
 	    collector.emit(new Values(word));
       }
+     // collector.ack(tuple);
 
     /*
     ----------------------TODO-----------------------

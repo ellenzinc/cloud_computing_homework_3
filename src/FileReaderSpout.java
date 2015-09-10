@@ -15,27 +15,52 @@ import backtype.storm.tuple.Values;
 public class FileReaderSpout implements IRichSpout {
   private SpoutOutputCollector _collector;
   private TopologyContext context;
-
+  private FileReader fileReader;
+  private boolean completed = false;
 
   @Override
   public void open(Map conf, TopologyContext context,
                    SpoutOutputCollector collector) {
 
+	
+	
+	
      /*
     ----------------------TODO-----------------------
     Task: initialize the file reader
 
 
     ------------------------------------------------- */
-
-    this.context = context;
-    this._collector = collector;
-  }
+	try{
+    	    this.context = context;
+   	 //   this._collector = collector;
+ 	    this.fileReader = new FileReader(conf.get("inputFile").toString());
+	} catch (FileNotFoundException e) {
+	    throw new RuntimeException("Error reading file " + conf.get("inputFile"));
+	}
+	this._collector = collector;
+ }
 
   @Override
   public void nextTuple() {
 
-     /*
+	if (completed) {
+	    try  {
+		Thread.sleep(1000);
+	    } catch(InterruptedException e) {}
+	}
+     	String str;
+	BufferedReader reader = new BufferedReader(fileReader);
+	try {
+	    while((str = reader.readLine())!=null){
+	        this._collector.emit(new Values(str), str);
+	    }
+	}  catch(Exception e) {
+	    throw new RuntimeException("Error reading tuple", e);
+	} finally {
+	    completed = true;
+	}
+	/*
     ----------------------TODO-----------------------
     Task:
     1. read the next line and emit a tuple for it
@@ -55,6 +80,11 @@ public class FileReaderSpout implements IRichSpout {
 
   @Override
   public void close() {
+     try{
+	 fileReader.close();
+     } catch(IOException e) {
+	 e.printStackTrace(); 
+     }
    /*
     ----------------------TODO-----------------------
     Task: close the file
